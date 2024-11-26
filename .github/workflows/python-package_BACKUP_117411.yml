@@ -1,0 +1,66 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+<<<<<<< HEAD
+      - name: Python Poetry Action
+        uses: abatilo/actions-poetry@v4
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - name: Configure Poetry to use matrix Python version
+        run: |
+          poetry env use python${{ matrix.python-version }}
+
+=======
+>>>>>>> upstream/main
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Lint with Ruff
+<<<<<<< HEAD
+        run: |
+          poetry run ruff check --output-format=github .
+
+      - name: Lint with Black
+        run: |
+          poetry run black --check . 
+=======
+        run: uv run ruff check --output-format=github .
+
+      - name: Format check with Ruff
+        run: uv run ruff format --check .
+>>>>>>> upstream/main
+
+      - name: Test with pytest
+        run: uv run pytest --cov=. --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
