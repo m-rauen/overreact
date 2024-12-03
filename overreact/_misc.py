@@ -6,7 +6,7 @@ Ideally, the functions here will be transferred to other modules in the future.
 from __future__ import annotations
 
 import contextlib
-from copy import deepcopy
+import functools
 from functools import lru_cache as cache
 from functools import wraps
 
@@ -17,6 +17,19 @@ from scipy.stats import cauchy, norm
 import overreact as rx
 from overreact import _constants as constants
 
+def ignore_unhashable(func): 
+    uncached = func.__wrapped__
+    attributes = functools.WRAPPER_ASSIGNMENTS + ('cache_info', 'cache_clear')
+    @functools.wraps(func, assigned=attributes) 
+    def wrapper(*args, **kwargs): 
+        try: 
+            return func(*args, **kwargs) 
+        except TypeError as error: 
+            if 'unhashable type' in str(error): 
+                return uncached(*args, **kwargs) 
+            raise 
+    wrapper.__uncached__ = uncached
+    return wrapper
 
 def _central_diff_weights(Np, ndiv=1):
     """
