@@ -17,7 +17,7 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.spatial.transform import Rotation
 
 from overreact import _constants as constants
-from overreact import _misc as misc
+from overreact import _misc as _misc
 
 logger = logging.getLogger(__name__)
 
