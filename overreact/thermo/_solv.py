@@ -5,10 +5,10 @@ from __future__ import annotations
 import logging
 
 import numpy as np
-from findiff import Diff as derivative
 
 import overreact as rx
 from overreact import _constants as constants
+from overreact._misc import _derivative as derivative
 from overreact import coords
 from overreact._misc import _derivative as derivative
 
@@ -124,7 +124,7 @@ def calc_cav_entropy(
             + (y * solvent.Vm * pressure / (constants.R * temperature)) * ratio**3
         )
         return -constants.R * temperature * gamma
-
+    
     cavity_entropy = derivative(
         func,
         x0=temperature,
