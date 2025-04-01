@@ -8,7 +8,6 @@ __all__ = ["change_reference_state", "equilibrium_constant"]
 import logging
 
 import numpy as np
-from overreact._misc import _derivative as derivative
 from scipy.special import factorial
 
 import overreact as rx

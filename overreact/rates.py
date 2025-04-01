@@ -93,12 +93,12 @@ def collins_kimball(
     Examples
     --------
     >>> radii = np.array([2.59, 2.71]) * constants.angstrom
-    >>> float(collins_kimball(radii, reactive_radius=2.6 * constants.angstrom,
-    ...              viscosity=8.91e-4) / constants.liter)
+    >>> collins_kimball(radii, reactive_radius=2.6 * constants.angstrom,
+    ...              viscosity=8.91e-4) / constants.liter
     3.6e9
-    >>> float(collins_kimball(radii, "water", reactive_radius=2.6 * constants.angstrom) / constants.liter)
+    >>> collins_kimball(radii, "water", reactive_radius=2.6 * constants.angstrom) / constants.liter
     3.6e9
-    >>> float(collins_kimball(radii, viscosity=8.91e-4) / constants.liter)
+    >>> collins_kimball(radii, viscosity=8.91e-4) / constants.liter
     3.7e9
     """
     radii = np.asarray(radii)
@@ -109,7 +109,7 @@ def collins_kimball(
             viscosity = viscosity(temperature)
         elif isinstance(viscosity, str):
             viscosity = liquid_viscosity(viscosity, temperature, pressure)
-        # NOTE(mrauen): maybe we could check if the radii of the analyzed species are approximately the same, if so, we could use the simple expression: D = (8 * constants.k * temperature) / (3 * np.asarray(viscosity))
+        # NOTE(mrauen): maybe we could check if the radii of the analyzed species are approximately the same, if so, we could use the simple expression: kd = (8 * constants.k * temperature) / (3 * np.asarray(viscosity))
         mutual_diff_coef = (
             constants.k * temperature / (6.0 * np.pi * np.asarray(viscosity))
         ) * np.sum(1.0 / radii)
