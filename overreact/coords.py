@@ -16,7 +16,7 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.spatial.transform import Rotation
 
 from overreact import _constants as constants
-from overreact import _misc as _misc
+from overreact import _misc as misc
 
 logger = logging.getLogger(__name__)
 
@@ -1680,7 +1680,7 @@ def gyradius(atommasses, atomcoords, method="iupac"):
         msg = f"unavailable method: '{method}'"
         raise ValueError(msg)
 
-@rx._misc.copy_unhashable()
+@misc.copy_unhashable()
 def inertia(atommasses, atomcoords, align=True):
     r"""Calculate primary moments and axes from the inertia tensor.
 
