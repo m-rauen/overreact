@@ -33,6 +33,7 @@ def test_broaden_spectrum_works() -> None:
     )
 
 
+<<<<<<< HEAD
 def test_number_points_central_diff() -> None:
     """Ensure that number of points is odd and less than number of divisions."""
     with pytest.raises(ValueError, match=r"^Number of points must be at least\s*"):
@@ -42,13 +43,20 @@ def test_number_points_central_diff() -> None:
         rx._misc._central_diff_weights(Np=2, ndiv=1)
 
 
+=======
+>>>>>>> 81f8b04 (test: added tests for the new code of _misc (derivative func + cache func))
 def test_derivative_order() -> None:
     """Ensures that 'order' is less than 'n', and, odd."""
     with pytest.raises(ValueError, match=r"^'order'\s*"):
         rx._misc._derivative(np.sin, x0=0, n=3, order=1)
 
+<<<<<<< HEAD
     with pytest.raises(ValueError, match=r"\ must be odd.$"):
         rx._misc._derivative(np.sin, x0=0, n=2, order=4)
+=======
+    with pytest.raises(ValueError, match=r"^'order'\s*"):
+        rx._misc._derivative(np.sin, x0=0, n=2, order=2)
+>>>>>>> 81f8b04 (test: added tests for the new code of _misc (derivative func + cache func))
 
 
 def test_first_derivative() -> None:
