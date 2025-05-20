@@ -34,8 +34,13 @@ def test_broaden_spectrum_works() -> None:
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 def test_number_points_central_diff() -> None:
     """Ensure that number of points is odd and less than number of divisions."""
+=======
+def test_number_points_central_diff() -> None:
+    """Ensure that number of points is odd and less than number of divisions"""
+>>>>>>> 8f911e2 (test: added isolated test for undefined derivative order + tests for central_diff_weights())
     with pytest.raises(ValueError, match=r"^Number of points must be at least\s*"):
         rx._misc._central_diff_weights(Np=1, ndiv=2)
 
@@ -43,13 +48,17 @@ def test_number_points_central_diff() -> None:
         rx._misc._central_diff_weights(Np=2, ndiv=1)
 
 
+<<<<<<< HEAD
 =======
 >>>>>>> 81f8b04 (test: added tests for the new code of _misc (derivative func + cache func))
+=======
+>>>>>>> 8f911e2 (test: added isolated test for undefined derivative order + tests for central_diff_weights())
 def test_derivative_order() -> None:
     """Ensures that 'order' is less than 'n', and, odd."""
     with pytest.raises(ValueError, match=r"^'order'\s*"):
         rx._misc._derivative(np.sin, x0=0, n=3, order=1)
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     with pytest.raises(ValueError, match=r"\ must be odd.$"):
         rx._misc._derivative(np.sin, x0=0, n=2, order=4)
@@ -57,6 +66,10 @@ def test_derivative_order() -> None:
     with pytest.raises(ValueError, match=r"^'order'\s*"):
         rx._misc._derivative(np.sin, x0=0, n=2, order=2)
 >>>>>>> 81f8b04 (test: added tests for the new code of _misc (derivative func + cache func))
+=======
+    with pytest.raises(ValueError, match=r"\ must be odd.$"):
+        rx._misc._derivative(np.sin, x0=0, n=2, order=4)
+>>>>>>> 8f911e2 (test: added isolated test for undefined derivative order + tests for central_diff_weights())
 
 
 def test_first_derivative() -> None:
@@ -76,6 +89,7 @@ def test_second_derivative() -> None:
 
 def test_high_order_derivative() -> None:
     """Confirms the right value for the nth derivative of a function."""
+<<<<<<< HEAD
     first_derivative_high_order = rx._misc._derivative(
         np.sin,
         x0=np.pi / 2,
@@ -90,6 +104,12 @@ def test_high_order_derivative() -> None:
         n=2,
         order=11,
     )
+=======
+    first_derivative_high_order = rx._misc._derivative(np.sin, x0=np.pi / 2, n=1, order=11)
+    assert first_derivative_high_order == pytest.approx(np.cos(np.pi / 2), rel=1e-3)
+
+    second_derivative_high_order = rx._misc._derivative(np.sin, x0=np.pi / 2, n=2, order=11)
+>>>>>>> 8f911e2 (test: added isolated test for undefined derivative order + tests for central_diff_weights())
     assert second_derivative_high_order == pytest.approx(-np.sin(np.pi / 2), rel=1e-3)
 
 
