@@ -117,12 +117,18 @@ def test_high_order_derivative() -> None:
 >>>>>>> 8f911e2 (test: added isolated test for undefined derivative order + tests for central_diff_weights())
 =======
     first_derivative_high_order = rx._misc._derivative(
-        np.sin, x0=np.pi / 2, n=1, order=11,
+        np.sin,
+        x0=np.pi / 2,
+        n=1,
+        order=11,
     )
     assert first_derivative_high_order == pytest.approx(np.cos(np.pi / 2), rel=1e-3)
 
     second_derivative_high_order = rx._misc._derivative(
-        np.sin, x0=np.pi / 2, n=2, order=11,
+        np.sin,
+        x0=np.pi / 2,
+        n=2,
+        order=11,
     )
 >>>>>>> cb4440b (style: updated code formatting)
     assert second_derivative_high_order == pytest.approx(-np.sin(np.pi / 2), rel=1e-3)
