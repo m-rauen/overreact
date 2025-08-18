@@ -174,6 +174,7 @@ def get_molecular_volume(
         else:
             msg = f"unavailable method: '{method}'"
             raise ValueError(msg)
+    VDW_MOL_VOL, CAV_MOL_VOL, ERR_MOL_VOL = vdw_volume, cav_volume, max(vdw_err, cav_err)
     return vdw_volume
 
 
