@@ -11,6 +11,7 @@ import numpy as np
 
 import overreact as rx
 from overreact import _constants as constants
+from coords import VDW_MOL_VOL, CAV_MOL_VOL, ERR_MOL_VOL
 
 logger = logging.getLogger(__name__)
 
@@ -104,8 +105,14 @@ def collins_kimball(
     3.7e9
     """
     # TODO(mrauen): I need to implement the code here that checks if radii is None, if so, overreact can calculate it for the involved species. The thing is, I'm trying to come up with a more precise way of doing this calculation based on what we already have.
-    radii = np.asarray(radii)
     temperature = np.asarray(temperature)
+    
+    if radii is None:
+        _, radii, _ = VDW_MOL_VOL, CAV_MOL_VOL, ERR_MOL_VOL
+        radii = np.asarray(radii)
+        molecular_radii = radii * constants.angstrom
+    else:
+        pass
 
     if mutual_diff_coef is None:
         if callable(viscosity):
