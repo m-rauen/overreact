@@ -47,6 +47,7 @@ def collins_kimball(
     radii,
     viscosity=None,
     reactive_radius=None,
+    surface_reactiviy=None,
     temperature=298.15,
     pressure=constants.atm,
     mutual_diff_coef=None,
@@ -60,6 +61,7 @@ def collins_kimball(
     radii : array-like, optional
     viscosity : float, str or callable, optional
     reactive_radius : float, optional
+    surface_reactiviy: float, optional
     temperature : array-like, optional
         Absolute temperature in Kelvin.
     pressure : array-like, optional
@@ -101,6 +103,7 @@ def collins_kimball(
     >>> collins_kimball(radii, viscosity=8.91e-4) / constants.liter
     3.7e9
     """
+    # TODO(mrauen): I need to implement the code here that checks if radii is None, if so, overreact can calculate it for the involved species. The thing is, I'm trying to come up with a more precise way of doing this calculation based on what we already have.
     radii = np.asarray(radii)
     temperature = np.asarray(temperature)
 
@@ -119,9 +122,16 @@ def collins_kimball(
         # it works. My guess is that there is some confusion between contact
         # distances (which are basically sums of two radii) and sums of pairs
         # of radii.
+        # NOTE(mrauen): it seems to me that the reactive radius is much more connected with the sum of the collision diameters of the involved molecules
         reactive_radius = np.sum(radii) / 2
 
-    return 4.0 * np.pi * mutual_diff_coef * reactive_radius * constants.N_A
+    if surface_reactiviy is None:
+        return 4.0 * np.pi * mutual_diff_coef * reactive_radius * constants.N_A
+    else:
+        effective_radii = surface_reactiviy * reactive_radius / mutual_diff_coef * surface_reactiviy
+        return(
+            (4.0 * np.pi * effective_radii * mutual_diff_coef) * (1.0 + np.sqrt((effective_radii**2 / np.pi * mutual_diff_coef))) * constants.N_A
+        )
 
 
 def ck_corrected(k_tst, k_diff):
