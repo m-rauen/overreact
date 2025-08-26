@@ -20,6 +20,7 @@ from overreact import _misc as misc
 
 logger = logging.getLogger(__name__)
 
+#CAV_MOL_VOL = []
 
 # TODO(schneiderfelipe): alpha should depend on temperature?
 def get_molecular_volume(
@@ -174,7 +175,11 @@ def get_molecular_volume(
         else:
             msg = f"unavailable method: '{method}'"
             raise ValueError(msg)
-    VDW_MOL_VOL, CAV_MOL_VOL, ERR_MOL_VOL = vdw_volume, cav_volume, max(vdw_err, cav_err)
+    
+    # for vol in cav_volume:
+    #     global CAV_MOL_VOL
+    #     CAV_MOL_VOL.append(vol) 
+        
     return vdw_volume
 
 

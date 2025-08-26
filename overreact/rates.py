@@ -11,7 +11,7 @@ import numpy as np
 
 import overreact as rx
 from overreact import _constants as constants
-from coords import VDW_MOL_VOL, CAV_MOL_VOL, ERR_MOL_VOL
+from overreact import _misc as misc
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +45,10 @@ def liquid_viscosity(id, temperature=298.15, pressure=constants.atm):
 
 # TODO(mrauen): log the calculated diffusional reaction rate limit.
 def collins_kimball(
-    radii,
+    radii=None,
     viscosity=None,
     reactive_radius=None,
-    surface_reactiviy=None,
+    surface_reactivity=None,
     temperature=298.15,
     pressure=constants.atm,
     mutual_diff_coef=None,
@@ -105,14 +105,15 @@ def collins_kimball(
     3.7e9
     """
     # TODO(mrauen): I need to implement the code here that checks if radii is None, if so, overreact can calculate it for the involved species. The thing is, I'm trying to come up with a more precise way of doing this calculation based on what we already have.
+    radii = np.asarray(radii)
     temperature = np.asarray(temperature)
     
-    if radii is None:
-        _, radii, _ = VDW_MOL_VOL, CAV_MOL_VOL, ERR_MOL_VOL
-        radii = np.asarray(radii)
-        molecular_radii = radii * constants.angstrom
-    else:
-        pass
+    # if radii is None:
+    #     radii = misc.molec_volume_to_molec_radii()
+    #     radii = np.asarray(radii)
+    #     print(radii)
+    # else:
+    #     pass
 
     if mutual_diff_coef is None:
         if callable(viscosity):
@@ -130,15 +131,17 @@ def collins_kimball(
         # distances (which are basically sums of two radii) and sums of pairs
         # of radii.
         # NOTE(mrauen): it seems to me that the reactive radius is much more connected with the sum of the collision diameters of the involved molecules
-        reactive_radius = np.sum(radii) / 2
+        reactive_radius = np.sum(radii)
 
-    if surface_reactiviy is None:
+    if surface_reactivity is None:
         return 4.0 * np.pi * mutual_diff_coef * reactive_radius * constants.N_A
     else:
-        effective_radii = surface_reactiviy * reactive_radius / mutual_diff_coef * surface_reactiviy
-        return(
-            (4.0 * np.pi * effective_radii * mutual_diff_coef) * (1.0 + np.sqrt((effective_radii**2 / np.pi * mutual_diff_coef))) * constants.N_A
-        )
+        smoluchowski_limit = 4.0 * np.pi * reactive_radius * mutual_diff_coef
+        space_reactivity = surface_reactivity * reactive_radius
+        surface_reactivity = space_reactivity * 4.0 * np.pi * (reactive_radius**2)
+        effective_radii = (surface_reactivity * reactive_radius) / (smoluchowski_limit + surface_reactivity)
+        arg = (effective_radii**2) / (np.pi * mutual_diff_coef * 1e-12)
+        return (4.0 * np.pi * effective_radii * mutual_diff_coef) * (1 + np.sqrt(arg)) * constants.N_A
 
 
 def ck_corrected(k_tst, k_diff):

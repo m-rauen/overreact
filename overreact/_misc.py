@@ -16,7 +16,7 @@ from scipy.stats import cauchy, norm
 
 import overreact as rx
 from overreact import _constants as constants
-
+from overreact import coords as coords
 
 def _central_diff_weights(Np, ndiv=1):
     """
@@ -268,6 +268,13 @@ def copy_unhashable(maxsize=128, typed=False):
         return wrapper
 
     return decorator
+
+# def molec_volume_to_molec_radii():
+#     molecular_radius = []
+#     for volume in coords.CAV_MOL_VOL:
+#         print(volume)
+#         #molecular_radius.append((volume ** (1/3)) / 2)
+#     return molecular_radius
 
 
 def _find_package(package):
