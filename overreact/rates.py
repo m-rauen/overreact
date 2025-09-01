@@ -48,7 +48,7 @@ def collins_kimball(
     radii=None,
     viscosity=None,
     reactive_radius=None,
-    surface_reactivity=None,
+    reactivity=None,
     temperature=298.15,
     pressure=constants.atm,
     mutual_diff_coef=None,
@@ -133,14 +133,14 @@ def collins_kimball(
         # NOTE(mrauen): it seems to me that the reactive radius is much more connected with the sum of the collision diameters of the involved molecules
         reactive_radius = np.sum(radii)
 
-    if surface_reactivity is None:
+    if reactivity is None:
         return 4.0 * np.pi * mutual_diff_coef * reactive_radius * constants.N_A
     else:
         smoluchowski_limit = 4.0 * np.pi * reactive_radius * mutual_diff_coef
-        space_reactivity = surface_reactivity * reactive_radius
+        space_reactivity = reactivity * reactive_radius
         surface_reactivity = space_reactivity * 4.0 * np.pi * (reactive_radius**2)
         effective_radii = (surface_reactivity * reactive_radius) / (smoluchowski_limit + surface_reactivity)
-        arg = (effective_radii**2) / (np.pi * mutual_diff_coef * 1e-12)
+        arg = (effective_radii**2) / (np.pi * mutual_diff_coef)
         return (4.0 * np.pi * effective_radii * mutual_diff_coef) * (1 + np.sqrt(arg)) * constants.N_A
 
 
