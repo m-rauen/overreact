@@ -20,8 +20,6 @@ from overreact import _misc as misc
 
 logger = logging.getLogger(__name__)
 
-#CAV_MOL_VOL = []
-
 # TODO(schneiderfelipe): alpha should depend on temperature?
 def get_molecular_volume(
     atomnos,
@@ -126,7 +124,7 @@ def get_molecular_volume(
     v2 = atomcoords.max(axis=0) + alpha * vdw_radii.max()
     box_volume = np.prod(v2 - v1)
     n = int(num * box_volume)
-
+    
     vdw_volumes = []
     if full_output and method == "izato":
         cav_volumes = []
@@ -176,12 +174,63 @@ def get_molecular_volume(
             msg = f"unavailable method: '{method}'"
             raise ValueError(msg)
     
-    # for vol in cav_volume:
-    #     global CAV_MOL_VOL
-    #     CAV_MOL_VOL.append(vol) 
-        
     return vdw_volume
 
+def get_molecular_radius(
+   atomnos, 
+   atomcoords,
+   full_output=False,
+   method='vdw',
+):
+    radii = []
+    vdw_volumes = get_molecular_volume(atomnos, atomcoords) 
+   
+    if full_output and method == 'garza':
+        cav_radii = []
+        vdw_volumes, cav_volumes, garza_error = get_molecular_volume(
+            atomnos,
+            atomcoords,
+            full_output=True,
+        )
+        for vdw_vol, cav_vol in zip(vdw_volumes, cav_volumes): 
+            radii.append(
+                ((3 * vdw_vol) / (4 * np.pi)) ** (1/3)
+            )
+            cav_radii.append(
+                ((3 * cav_vol) / (4 * np.pi)) ** (1/3)
+            )
+            logger.debug(
+                f"Garza cavity radius = {cav_radii} ± {garza_error} A³"
+            )
+        return (radii, cav_radii, garza_error)
+    elif full_output and method == 'izato':
+        cav_radii = []
+        vdw_volumes, cav_volumes, izato_error = get_molecular_volume(
+            atomnos, 
+            atomcoords,
+            full_output=True,
+            method='izato',
+        )
+        for vdw_vol, cav_vol in zip(vdw_volumes, cav_volumes):
+            radii.append(
+                ((3 * vdw_vol) / (4 * np.pi)) ** (1/3)
+            )
+            cav_radii.append(
+                ((3 * cav_vol) / (4 * np.pi)) ** (1/3)
+            )
+            logger.debug(
+                f"Izato cavity radius = {cav_radii} ± {izato_error} A³"
+                )
+    else:
+        msg = f"unavailable method: '{method}'"
+        raise ValueError(msg)
+    
+    for vdw_vol in vdw_volumes: 
+        radii.append(
+            ((3 * vdw_vol) / (4 * np.pi)) ** (1/3)
+        )
+        
+    return radii
 
 def _garza(
     vdw_volume,

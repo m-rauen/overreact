@@ -766,6 +766,28 @@ def get_kappa(
     )
     return vec_kappas
 
+def get_kdiff(
+   compounds: dict | None = None,
+   radii: list[float] | None = None,
+   temperature:float = 298.15,
+   pressure:float = constants.atm,
+) -> float:
+    radii = []
+    
+    if compounds is not None:
+        compounds = rx.io._check_compounds(compounds)
+       
+    #TODO(mrauen): for some reason it's returning an empty array in 'test.py', I don't think the problem is the compounds, since I already spend the afternoon checking it out
+    if radii is None:
+        for name in compounds:
+            radii.append(
+                coords.get_molecular_radius(
+                    atomnos=compounds[name].atomnos,
+                    atomcoords=compounds[name].atomcoords,
+                )
+            )
+        
+    return radii
 
 def get_drc(
     scheme,

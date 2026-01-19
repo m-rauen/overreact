@@ -11,7 +11,8 @@ import numpy as np
 
 import overreact as rx
 from overreact import _constants as constants
-from overreact import _misc as misc
+from overreact import io as io
+from overreact import coords as coords
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,6 @@ def liquid_viscosity(id, temperature=298.15, pressure=constants.atm):
     return rx._misc._get_chemical(id, temperature, pressure).mul
 
 
-# TODO(mrauen): log the calculated diffusional reaction rate limit.
 def collins_kimball(
     radii=None,
     viscosity=None,
@@ -108,19 +108,17 @@ def collins_kimball(
     radii = np.asarray(radii)
     temperature = np.asarray(temperature)
     
-    # if radii is None:
-    #     radii = misc.molec_volume_to_molec_radii()
-    #     radii = np.asarray(radii)
-    #     print(radii)
-    # else:
-    #     pass
+    if radii is None:
+        pass
+    else:
+        pass
 
     if mutual_diff_coef is None:
         if callable(viscosity):
             viscosity = viscosity(temperature)
         elif isinstance(viscosity, str):
             viscosity = liquid_viscosity(viscosity, temperature, pressure)
-        # NOTE(mrauen): maybe we could check if the radii of the analyzed species are approximately the same, if so, we could use the simple expression: D = (8 * constants.k * temperature) / (3 * np.asarray(viscosity))
+        
         mutual_diff_coef = (
             constants.k * temperature / (6.0 * np.pi * np.asarray(viscosity))
         ) * np.sum(1.0 / radii)
@@ -132,19 +130,15 @@ def collins_kimball(
         # of radii.
         # NOTE(mrauen): it seems to me that the reactive radius is much more connected with the sum of the collision diameters of the involved molecules
         reactive_radius = np.sum(radii)
-
+    
     if reactivity is None:
-        return 4.0 * np.pi * mutual_diff_coef * reactive_radius * constants.N_A
+        return (4.0 * np.pi * reactive_radius * mutual_diff_coef) * constants.N_A
     else:
-        smoluchowski_limit = 4.0 * np.pi * reactive_radius * mutual_diff_coef
-        space_reactivity = reactivity * reactive_radius
-        surface_reactivity = space_reactivity * 4.0 * np.pi * (reactive_radius**2)
-        effective_radii = (surface_reactivity * reactive_radius) / (smoluchowski_limit + surface_reactivity)
-        arg = (effective_radii**2) / (np.pi * mutual_diff_coef)
-        return (4.0 * np.pi * effective_radii * mutual_diff_coef) * (1 + np.sqrt(arg)) * constants.N_A
+        surface_reactivity = (reactivity * reactive_radius) / 3
+        return (4.0 * np.pi * reactive_radius * mutual_diff_coef) * (surface_reactivity / (surface_reactivity + (mutual_diff_coef / reactive_radius))) * constants.N_A
 
 
-def ck_corrected(k_tst, k_diff):
+def ck_correction(k_tst, k_diff):
     """Calculate reaction rate constant inclusing diffusion effects.
 
     This implementation is based on doi:10.1016/0095-8522(49)90023-9.
