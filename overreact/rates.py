@@ -45,12 +45,12 @@ def liquid_viscosity(id, temperature=298.15, pressure=constants.atm):
 
 
 def collins_kimball(
-    radii=None,
-    viscosity=None,
-    reactive_radius=None,
-    reactivity=None,
-    temperature=298.15,
-    pressure=constants.atm,
+    radii: float | np.ndarray = None,
+    viscosity: str =  None,
+    reactive_radius: float | np.ndarray = None,
+    reactivity: float | np.ndarray = None,
+    temperature: float | np.ndarray = 298.15,
+    pressure: float = constants.atm,
     mutual_diff_coef=None,
 ):
     r"""Calculate irreversible diffusion-controlled reaction rate constant.
@@ -104,14 +104,8 @@ def collins_kimball(
     >>> collins_kimball(radii, viscosity=8.91e-4) / constants.liter
     3.7e9
     """
-    # TODO(mrauen): I need to implement the code here that checks if radii is None, if so, overreact can calculate it for the involved species. The thing is, I'm trying to come up with a more precise way of doing this calculation based on what we already have.
     radii = np.asarray(radii)
     temperature = np.asarray(temperature)
-    
-    if radii is None:
-        pass
-    else:
-        pass
 
     if mutual_diff_coef is None:
         if callable(viscosity):
@@ -121,24 +115,27 @@ def collins_kimball(
         
         mutual_diff_coef = (
             constants.k * temperature / (6.0 * np.pi * np.asarray(viscosity))
-        ) * np.sum(1.0 / radii)
-
+        ) * np.sum(1.0 / radii, axis=1)
+        
     if reactive_radius is None:
         # NOTE(schneiderfelipe): not sure if I should divide by two here, but
         # it works. My guess is that there is some confusion between contact
         # distances (which are basically sums of two radii) and sums of pairs
         # of radii.
         # NOTE(mrauen): it seems to me that the reactive radius is much more connected with the sum of the collision diameters of the involved molecules
-        reactive_radius = np.sum(radii)
+        reactive_radius = np.sum(radii, axis=1)
     
     if reactivity is None:
-        return (4.0 * np.pi * reactive_radius * mutual_diff_coef) * constants.N_A
+        return (4.0 * np.pi * reactive_radius * mutual_diff_coef) * constants.N_A / constants.liter
     else:
         surface_reactivity = (reactivity * reactive_radius) / 3
-        return (4.0 * np.pi * reactive_radius * mutual_diff_coef) * (surface_reactivity / (surface_reactivity + (mutual_diff_coef / reactive_radius))) * constants.N_A
+        return (4.0 * np.pi * reactive_radius * mutual_diff_coef) * (surface_reactivity / (surface_reactivity + (mutual_diff_coef / reactive_radius))) * constants.N_A / constants.liter
 
 
-def ck_correction(k_tst, k_diff):
+def ck_correction(
+    k_tst: float | np.ndarray,
+    k_diff: float | np.ndarray
+):
     """Calculate reaction rate constant inclusing diffusion effects.
 
     This implementation is based on doi:10.1016/0095-8522(49)90023-9.

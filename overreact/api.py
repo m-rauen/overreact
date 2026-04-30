@@ -14,6 +14,8 @@ __all__ = [
     "get_internal_energies",
     "get_k",
     "get_kappa",
+    "get_kdiff",
+    "get_kobs"
 ]
 
 
@@ -766,28 +768,62 @@ def get_kappa(
     )
     return vec_kappas
 
+# TODO(m-rauen): docstring for this function!!
 def get_kdiff(
-   compounds: dict | None = None,
-   radii: list[float] | None = None,
-   temperature:float = 298.15,
-   pressure:float = constants.atm,
+    scheme: Scheme | dict,
+    compounds: dict | None = None,
+    environment: str | None = None,
+    radii: list[float] | None = None,
+    temperature: float = 298.15,
+    pressure: float = constants.atm,
 ) -> float:
-    radii = []
+    if radii is None:
+        radii = []
     
+    for name in compounds: 
+        if environment is None:
+            environment = rx.core._get_environment(name)
+        
+    scheme = rx.core._check_scheme(scheme) 
     if compounds is not None:
         compounds = rx.io._check_compounds(compounds)
        
-    #TODO(mrauen): for some reason it's returning an empty array in 'test.py', I don't think the problem is the compounds, since I already spend the afternoon checking it out
-    if radii is None:
-        for name in compounds:
-            radii.append(
+    for col_idx, column in enumerate(zip(*scheme.A)):
+        count_reactant = sum(1 for value in column if value < 0)
+        if count_reactant == 2:
+            reactant_indices = (id for id, val in enumerate(column) if val < 0)
+            reactant_names = (scheme.compounds[indice] for indice in reactant_indices)
+            radii_reactant = [
                 coords.get_molecular_radius(
-                    atomnos=compounds[name].atomnos,
-                    atomcoords=compounds[name].atomcoords,
-                )
-            )
+                    atomnos=compounds[reactant].atomnos,
+                    atomcoords=compounds[reactant].atomcoords,
+                ) for reactant in reactant_names
+            ]
+            radii.append(radii_reactant)
+        elif count_reactant == 1:
+            logger.warning('Unimolecular reactions [...]')
+            pass
+        elif count_reactant > 2:
+            logger.warning('Reactants are more than 2 species, skipping diffusional rate constant calculation...')
+            pass
         
-    return radii
+    # TODO (m-rauen): what about 'mutual_diff_coef', 'reactivity' and 'reaction_radius'? If the user wants to pass the parameters instead of calculate entirely via Overreact.
+    kdiff = rates.collins_kimball(
+        radii=radii,
+        viscosity=environment,
+        temperature=temperature,
+        pressure=pressure,
+    )
+    return kdiff
+
+def get_kobs(
+    k_tst: float | np.ndarray,
+    k_diffusion: float | np.ndarray,
+):
+    return rates.ck_correction(
+        k_diffusion,
+        k_tst
+    ) 
 
 def get_drc(
     scheme,

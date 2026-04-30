@@ -575,6 +575,16 @@ class Report:
             qrrho=self.qrrho,
             temperature=self.temperature,
         )
+        kdiff = rx.get_kdiff(
+            self.model.scheme,
+            self.model.compounds,
+            temperature=self.temperature,
+            pressure=self.pressure
+        )
+        kobs = rx.get_kobs(
+            k["M⁻ⁿ⁺¹·s⁻¹"],
+            kdiff
+        )
 
         kinetics_table = Table(
             *(
@@ -585,6 +595,9 @@ class Report:
                 ]
                 + [Column(f"k\n〈{scale}〉", justify="center") for scale in k]
                 + [Column("κ", justify="center")]
+                # TODO(m-rauen): add 'method' and pass it so that CLI prints it as kCK or kES (collins-kimball or einstein-smoluchowski)
+                + [Column(f"kdiff\n 〈M⁻¹·s⁻¹〉", justify="center")]
+                + [Column(f"k\u2090\u209a\u209a\n 〈M⁻¹·s⁻¹〉", justify="center")]
             ),
             title="estimated reaction rate constants",
             box=self.box_style,
@@ -594,10 +607,14 @@ class Report:
                 [f"{i:d}", reaction, "No"]
                 + [f"{k[scale][i]:.3g}" for scale in k]
                 + [f"{kappa[i]:.3g}"]
+                + [f"{kdiff[i]:.3g}" if kdiff[i] is not None else "-"]
+                + [f"{kobs[i]:.3g}" if kobs[i] is not None else "-"]
             )
             if self.model.scheme.is_half_equilibrium[i]:
                 row[2] = "Yes"
                 row[-1] = None  # hide transmission coefficient
+                row[-2] = None  # hide diffusion rate
+                row[-3] = None  # hide kobs correction
 
             kinetics_table.add_row(*row)
         yield kinetics_table

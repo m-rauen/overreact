@@ -177,61 +177,51 @@ def get_molecular_volume(
     return vdw_volume
 
 def get_molecular_radius(
-   atomnos, 
-   atomcoords,
-   full_output=False,
-   method='vdw',
+   atomnos: tuple[int, ...], 
+   atomcoords: tuple[(int, ...), ...],
+   full_output: bool = False,
+   method: str = 'vdw',
 ):
-    radii = []
-    vdw_volumes = get_molecular_volume(atomnos, atomcoords) 
-   
-    if full_output and method == 'garza':
-        cav_radii = []
-        vdw_volumes, cav_volumes, garza_error = get_molecular_volume(
-            atomnos,
-            atomcoords,
-            full_output=True,
-        )
-        for vdw_vol, cav_vol in zip(vdw_volumes, cav_volumes): 
-            radii.append(
-                ((3 * vdw_vol) / (4 * np.pi)) ** (1/3)
-            )
-            cav_radii.append(
-                ((3 * cav_vol) / (4 * np.pi)) ** (1/3)
-            )
-            logger.debug(
-                f"Garza cavity radius = {cav_radii} ± {garza_error} A³"
-            )
-        return (radii, cav_radii, garza_error)
-    elif full_output and method == 'izato':
-        cav_radii = []
-        vdw_volumes, cav_volumes, izato_error = get_molecular_volume(
-            atomnos, 
-            atomcoords,
-            full_output=True,
-            method='izato',
-        )
-        for vdw_vol, cav_vol in zip(vdw_volumes, cav_volumes):
-            radii.append(
-                ((3 * vdw_vol) / (4 * np.pi)) ** (1/3)
-            )
-            cav_radii.append(
-                ((3 * cav_vol) / (4 * np.pi)) ** (1/3)
-            )
-            logger.debug(
-                f"Izato cavity radius = {cav_radii} ± {izato_error} A³"
-                )
-    else:
-        msg = f"unavailable method: '{method}'"
-        raise ValueError(msg)
+    def _molecular_volume_to_radius(volume):
+        return ((3 * volume) / (4 * np.pi)) ** (1/3)
     
-    for vdw_vol in vdw_volumes: 
-        radii.append(
-            ((3 * vdw_vol) / (4 * np.pi)) ** (1/3)
+    if not full_output:
+        vdw_volumes = get_molecular_volume(
+            atomnos,
+            atomcoords
         )
-        
-    return radii
-
+        return _molecular_volume_to_radius(vdw_volumes)
+    
+    elif full_output:
+        if method == 'garza':
+            vdw_volumes, cav_volumes, garza_error = get_molecular_volume(
+                atomnos,
+                atomcoords,
+                full_output=True
+            )
+            radii = _molecular_volume_to_radius(vdw_volumes)
+            cav_radii = _molecular_volume_to_radius(cav_volumes)
+            logger.debug(
+                f"Garza cavity radius = {cav_radii} ± {garza_error} Å"
+            )
+            return (radii, cav_radii, garza_error)
+        elif method == 'izato':
+            vdw_volumes, cav_volumes, izato_error = get_molecular_volume(
+                atomnos,
+                atomcoords,
+                method='izato',
+                full_output=True
+            )
+            radii = _molecular_volume_to_radius(vdw_volumes)
+            cav_radii = _molecular_volume_to_radius(cav_volumes)
+            logger.debug(
+                f"Izato cavity radius = {cav_radii} ± {izato_error} Å"
+            )
+            return (radii, cav_radii, izato_error)
+        else:
+            msg = f"unavailable method: '{method}'"
+            raise ValueError(msg)
+            
 def _garza(
     vdw_volume,
     environment="water",

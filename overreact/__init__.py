@@ -13,6 +13,8 @@ from overreact.api import (
     get_internal_energies,
     get_k,
     get_kappa,
+    get_kdiff,
+    get_kobs
 )
 from overreact.core import (
     Scheme,
@@ -38,6 +40,7 @@ __all__ = [
     "get_internal_energies",
     "get_k",
     "get_kappa",
+    "get_kdiff",
     "get_reaction_entropies",
     "get_transition_states",
     "get_y",
