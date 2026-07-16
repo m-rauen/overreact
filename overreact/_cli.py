@@ -575,7 +575,7 @@ class Report:
             qrrho=self.qrrho,
             temperature=self.temperature,
         )
-        kdiff = rx.get_kdiff(
+        kdiff, diff_method = rx.get_kdiff(
             self.model.scheme,
             self.model.compounds,
             temperature=self.temperature,
@@ -607,7 +607,7 @@ class Report:
                 [f"{i:d}", reaction, "No"]
                 + [f"{k[scale][i]:.3g}" for scale in k]
                 + [f"{kappa[i]:.3g}"]
-                + [f"{kdiff[i]:.3g}" if kdiff[i] is not None else "-"]
+                + [f"{kdiff[i]:.3g}" if np.isfinite(kdiff[i]) else "-"]
                 + [f"{kobs[i]:.3g}" if kobs[i] is not None else "-"]
             )
             if self.model.scheme.is_half_equilibrium[i]:
@@ -625,6 +625,13 @@ class Report:
         yield Markdown(
             "For **half-equilibria**, only ratios make sense: in simulations, **equilibria will be adjusted to be faster than all other reactions**.",
         )
+        
+        if diff_method == None:
+            pass
+        else:
+            yield Markdown(
+                "Diffusional rate constant calculated through the " f"{diff_method} formalism."
+            )
 
         if self.concentrations is not None and self.concentrations:
             scheme, k, y0 = _prepare_simulation(

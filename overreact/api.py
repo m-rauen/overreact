@@ -774,11 +774,20 @@ def get_kdiff(
     compounds: dict | None = None,
     environment: str | None = None,
     radii: list[float] | None = None,
+    is_bimolecular: list[bool] | None = None,
     temperature: float = 298.15,
     pressure: float = constants.atm,
 ) -> float:
+    print("scheme.A shape =", np.asarray(scheme.A).shape)
+    print("number of reactions =", len(scheme.reactions))
+    print('before:{}'.format(is_bimolecular))
+    print('reactions:{}'.format(scheme.reactions))
+    
     if radii is None:
         radii = []
+        
+    if is_bimolecular is None:
+        is_bimolecular = []
     
     for name in compounds: 
         if environment is None:
@@ -788,11 +797,25 @@ def get_kdiff(
     if compounds is not None:
         compounds = rx.io._check_compounds(compounds)
        
-    for col_idx, column in enumerate(zip(*scheme.A)):
+    for rx_id, column in enumerate(zip(*scheme.A)):
         count_reactant = sum(1 for value in column if value < 0)
         if count_reactant == 2:
-            reactant_indices = (id for id, val in enumerate(column) if val < 0)
-            reactant_names = (scheme.compounds[indice] for indice in reactant_indices)
+            print("""
+                  reaction: {}
+                  reactant counter: {}
+                  """.format(rx_id, count_reactant))
+            reactant_indices = [
+                i for i, val in enumerate(column)
+                if val < 0
+            ]
+
+            reactant_names = [
+                scheme.compounds[i]
+                for i in reactant_indices
+            ] 
+            
+            # reactant_indices = (id for id, val in enumerate(column) if val < 0)
+            # reactant_names = (scheme.compounds[indice] for indice in reactant_indices)
             radii_reactant = [
                 coords.get_molecular_radius(
                     atomnos=compounds[reactant].atomnos,
@@ -800,21 +823,26 @@ def get_kdiff(
                 ) for reactant in reactant_names
             ]
             radii.append(radii_reactant)
+            is_bimolecular.append(True)
         elif count_reactant == 1:
-            logger.warning('Unimolecular reactions [...]')
-            pass
+            logger.warning("skipping diffusion rate constant calculation (unimolecular reaction)")
+            radii.append(None)
+            is_bimolecular.append(False)
         elif count_reactant > 2:
-            logger.warning('Reactants are more than 2 species, skipping diffusional rate constant calculation...')
-            pass
-        
-    # TODO (m-rauen): what about 'mutual_diff_coef', 'reactivity' and 'reaction_radius'? If the user wants to pass the parameters instead of calculate entirely via Overreact.
-    kdiff = rates.collins_kimball(
+            logger.warning("skipping diffusion rate constant calculation (reaction with more than 2 reactants)")
+            radii.append(None)
+            is_bimolecular.append(False)
+       
+    print('after:{}'.format(is_bimolecular))
+      
+    kdiff, diffusion_method = rates.collins_kimball(
         radii=radii,
+        is_bimolecular=is_bimolecular,
         viscosity=environment,
         temperature=temperature,
         pressure=pressure,
     )
-    return kdiff
+    return kdiff, diffusion_method
 
 def get_kobs(
     k_tst: float | np.ndarray,

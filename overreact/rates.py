@@ -51,7 +51,9 @@ def collins_kimball(
     reactivity: float | np.ndarray = None,
     temperature: float | np.ndarray = 298.15,
     pressure: float = constants.atm,
-    mutual_diff_coef=None,
+    mutual_diff_coef: float | np.ndarray = None,
+    diffusion_method: str = 'Einstein-Smoluchowski',
+    is_bimolecular: list[bool] | None = None
 ):
     r"""Calculate irreversible diffusion-controlled reaction rate constant.
 
@@ -104,9 +106,15 @@ def collins_kimball(
     >>> collins_kimball(radii, viscosity=8.91e-4) / constants.liter
     3.7e9
     """
-    radii = np.asarray(radii)
+    final_kdiff = np.full(len(radii), np.inf)
     temperature = np.asarray(temperature)
-
+    
+    for idx, rad in enumerate(radii):
+        if not is_bimolecular[idx]:
+            continue
+        
+        radius = np.asarray(rad)
+        
     if mutual_diff_coef is None:
         if callable(viscosity):
             viscosity = viscosity(temperature)
@@ -115,7 +123,7 @@ def collins_kimball(
         
         mutual_diff_coef = (
             constants.k * temperature / (6.0 * np.pi * np.asarray(viscosity))
-        ) * np.sum(1.0 / radii, axis=1)
+        ) * np.sum(1.0 / radius, axis=0)
         
     if reactive_radius is None:
         # NOTE(schneiderfelipe): not sure if I should divide by two here, but
@@ -123,13 +131,18 @@ def collins_kimball(
         # distances (which are basically sums of two radii) and sums of pairs
         # of radii.
         # NOTE(mrauen): it seems to me that the reactive radius is much more connected with the sum of the collision diameters of the involved molecules
-        reactive_radius = np.sum(radii, axis=1)
+        reactive_radius = np.sum(radius, axis=0)
     
     if reactivity is None:
-        return (4.0 * np.pi * reactive_radius * mutual_diff_coef) * constants.N_A / constants.liter
+        final_kdiff[idx] = (4.0 * np.pi * reactive_radius * mutual_diff_coef) * constants.N_A / constants.liter
+        #return (4.0 * np.pi * reactive_radius * mutual_diff_coef) * constants.N_A / constants.liter, diffusion_method
     else:
+        diffusion_method = 'Collins-Kimball'
         surface_reactivity = (reactivity * reactive_radius) / 3
-        return (4.0 * np.pi * reactive_radius * mutual_diff_coef) * (surface_reactivity / (surface_reactivity + (mutual_diff_coef / reactive_radius))) * constants.N_A / constants.liter
+        final_kdiff[idx] = 4.0 * np.pi * reactive_radius * mutual_diff_coef * (surface_reactivity / (surface_reactivity + (mutual_diff_coef / reactive_radius))) * constants.N_A / constants.liter
+        #return (4.0 * np.pi * reactive_radius * mutual_diff_coef) * (surface_reactivity / (surface_reactivity + (mutual_diff_coef / reactive_radius))) * constants.N_A / constants.liter, diffusion_method
+        
+    return final_kdiff, diffusion_method
 
 
 def ck_correction(
