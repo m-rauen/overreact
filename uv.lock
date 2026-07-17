@@ -1836,7 +1836,11 @@ dev = [
     { name = "pytest", specifier = ">=7.2,<10.0" },
     { name = "pytest-cov", specifier = ">=4,<6" },
     { name = "rich", specifier = ">=13,<15" },
+<<<<<<< HEAD
     { name = "ruff", specifier = ">=0.0.210,<0.16.3" },
+=======
+    { name = "ruff", specifier = ">=0.0.210,<0.15.21" },
+>>>>>>> 2820986 (feat: adding reactants separation based on reaction scheme)
     { name = "seaborn", specifier = ">=0.12,<0.14" },
     { name = "thermo", specifier = ">=0.2" },
     { name = "types-setuptools", specifier = ">=65,<84" },
