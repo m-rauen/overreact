@@ -774,56 +774,56 @@ def get_kdiff(
     scheme: Scheme | dict,
     compounds: dict | None = None,
     environment: str | None = None,
-    radii: list[float] | None = None,
-    bimolecular: list[str] | None = None,
     temperature: float = 298.15,
     pressure: float = constants.atm,
 ) -> float:
-    if radii is None:
-        radii = []
-        
-    if bimolecular is None:
-        bimolecular = []
-    
-    for name in compounds: 
-        if environment is None:
-            environment = rx.core._get_environment(name)
-        
     scheme = rx.core._check_scheme(scheme) 
     if compounds is not None:
         compounds = rx.io._check_compounds(compounds)
+    
+    for name in compounds:
+        if environment is None:
+            environment = rx.core._get_environment(name)
+        
+    number_reactions = len(scheme.reactions)
+    kdiff = np.full(number_reactions, np.inf)
+    diffusion_method = None
        
-    for reaction in (scheme.reactions): 
-        reactants = re.split('-> | <=>', reaction)[0]
-        for spc in reactants.strip().split('+'):
-            bimolecular.extend(spc)
-            
-    #         radii_reactant = [
-    #             coords.get_molecular_radius(
-    #                 atomnos=compounds[reactant].atomnos,
-    #                 atomcoords=compounds[reactant].atomcoords,
-    #             ) for reactant in reactant_names
-    #         ]
-    #         radii.append(radii_reactant)
-    #         is_bimolecular.append(True)
-    #     elif count_reactant == 1:
-    #         logger.warning("skipping diffusion rate constant calculation (unimolecular reaction)")
-    #         radii.append(None)
-    #         is_bimolecular.append(False)
-    #     elif count_reactant > 2:
-    #         logger.warning("skipping diffusion rate constant calculation (reaction with more than 2 reactants)")
-    #         radii.append(None)
-    #         is_bimolecular.append(False)
-      
-    # kdiff, diffusion_method = rates.collins_kimball(
-    #     radii=radii,
-    #     is_bimolecular=is_bimolecular,
-    #     viscosity=environment,
-    #     temperature=temperature,
-    #     pressure=pressure,
-    # )
-    # return kdiff, diffusion_method
-    pass
+    for idx, reaction in enumerate(scheme.reactions): 
+        # NOTE(m-rauen): I'm not 100% sure if I should maintain the splitting like [0:-1]. Of course last step (-1) doesn't count because of products assumption, however, the diffusion to encounter-distance of intermediates is being considered now (0:), instead of just the reaction step (0).
+        reactants = re.split(r"\s*->\s*|\s*<=>\s*", reaction)[:-1]
+        species = [s.strip() for s in reactants.split('+')]
+        if len(species) != 2:
+            if len(species) == 1:
+                logger.warning(
+                    f"reaction {idx} ({reaction}) is unimolecular: "
+                    "skipping diffusional rate constant calculation",
+                )
+            else:
+                logger.warning(
+                    f"reaction {idx} ({reaction}) has 3 (or more) reactants: " 
+                    "skipping diffusional rate constant calculation",
+                )
+            continue
+        
+        radii = np.array(
+            [
+                coords.get_molecular_radius(
+                    atomnos=compounds[spc].atomnos,
+                    atomcoords=compounds[spc].atomcoords
+                )
+                for spc in species
+            ],
+        ) 
+        
+        kdiff[idx], diffusion_method = rates.collins_kimball(
+            radii=radii,
+            viscosity=environment,
+            temperature=temperature,
+            pressure=pressure,
+            diffusion_method=diffusion_method
+        )
+
 
 def get_kobs(
     k_tst: float | np.ndarray,
@@ -833,6 +833,7 @@ def get_kobs(
         k_diffusion,
         k_tst
     ) 
+    
 
 def get_drc(
     scheme,
