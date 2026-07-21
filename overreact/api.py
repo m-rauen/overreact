@@ -787,12 +787,13 @@ def get_kdiff(
         
     number_reactions = len(scheme.reactions)
     kdiff = np.full(number_reactions, np.inf)
-    diffusion_method = None
        
     for idx, reaction in enumerate(scheme.reactions): 
-        # NOTE(m-rauen): I'm not 100% sure if I should maintain the splitting like [0:-1]. Of course last step (-1) doesn't count because of products assumption, however, the diffusion to encounter-distance of intermediates is being considered now (0:), instead of just the reaction step (0).
+        # NOTE(m-rauen): I'm not 100% sure if I should maintain the splitting like [0:-1]. Of course last step (-1) doesn't count because of products assumption, however, the diffusion to encounter-distance of intermediates is being considered now (0:), instead of *only* the original reactants (0).
         reactants = re.split(r"\s*->\s*|\s*<=>\s*", reaction)[:-1]
-        species = [s.strip() for s in reactants.split('+')]
+        for spc in reactants:
+            species = [s.strip() for s in spc.split('+')]
+        
         if len(species) != 2:
             if len(species) == 1:
                 logger.warning(
@@ -821,8 +822,9 @@ def get_kdiff(
             viscosity=environment,
             temperature=temperature,
             pressure=pressure,
-            diffusion_method=diffusion_method
         )
+    
+    return kdiff, diffusion_method
 
 
 def get_kobs(

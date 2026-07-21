@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 if _found_seaborn:
     import seaborn as sns
 
+    #TODO (m-rauen): "set", from seaborn, is deprecated in favor of "set_theme". For more info see https://seaborn.pydata.org/generated/seaborn.set.html
     sns.set(style="white", palette="colorblind")
 else:
     logger.warning("Install seaborn to get nicer plots: pip install seaborn")
@@ -533,8 +534,6 @@ class Report:
                 atol=self.atol,
             )
 
-        # TODO(schneiderfelipe): apply other corrections to k (such as
-        # diffusion control).
         # TODO(schneiderfelipe): use pressure.
         k = {
             "M⁻ⁿ⁺¹·s⁻¹": rx.get_k(
@@ -595,7 +594,6 @@ class Report:
                 ]
                 + [Column(f"k\n〈{scale}〉", justify="center") for scale in k]
                 + [Column("κ", justify="center")]
-                # TODO(m-rauen): add 'method' and pass it so that CLI prints it as kCK or kES (collins-kimball or einstein-smoluchowski)
                 + [Column(f"kdiff\n 〈M⁻¹·s⁻¹〉", justify="center")]
                 + [Column(f"k\u2090\u209a\u209a\n 〈M⁻¹·s⁻¹〉", justify="center")]
             ),
@@ -608,7 +606,7 @@ class Report:
                 + [f"{k[scale][i]:.3g}" for scale in k]
                 + [f"{kappa[i]:.3g}"]
                 + [f"{kdiff[i]:.3g}" if np.isfinite(kdiff[i]) else "-"]
-                + [f"{kobs[i]:.3g}" if kobs[i] is not None else "-"]
+                + [f"{kobs[i]:.3g}" if not np.isnan(kobs[i]) else f"{k['M⁻ⁿ⁺¹·s⁻¹'][i]:.3g}"]
             )
             if self.model.scheme.is_half_equilibrium[i]:
                 row[2] = "Yes"
@@ -626,11 +624,11 @@ class Report:
             "For **half-equilibria**, only ratios make sense: in simulations, **equilibria will be adjusted to be faster than all other reactions**.",
         )
         
-        if diff_method == None:
+        if all(rates == kdiff[0] for rates in kdiff) == True:
             pass
         else:
             yield Markdown(
-                "Diffusional rate constant calculated through the " f"{diff_method} formalism."
+                "Diffusional rate constant(s) calculated through the " f"{diff_method} formalism."
             )
 
         if self.concentrations is not None and self.concentrations:
