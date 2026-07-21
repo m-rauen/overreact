@@ -832,8 +832,8 @@ def get_kapp(
     k_diffusion: float | np.ndarray,
 ) -> float:
     return rates.ck_correction(
-        k_diffusion,
-        k_tst
+        k_tst,
+        k_diffusion
     ) 
     
 
