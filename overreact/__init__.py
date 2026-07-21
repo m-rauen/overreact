@@ -14,7 +14,7 @@ from overreact.api import (
     get_k,
     get_kappa,
     get_kdiff,
-    get_kobs
+    get_kapp
 )
 from overreact.core import (
     Scheme,

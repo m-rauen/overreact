@@ -580,7 +580,7 @@ class Report:
             temperature=self.temperature,
             pressure=self.pressure
         )
-        kobs = rx.get_kobs(
+        kapp = rx.get_kapp(
             k["M⁻ⁿ⁺¹·s⁻¹"],
             kdiff
         )
@@ -606,13 +606,13 @@ class Report:
                 + [f"{k[scale][i]:.3g}" for scale in k]
                 + [f"{kappa[i]:.3g}"]
                 + [f"{kdiff[i]:.3g}" if np.isfinite(kdiff[i]) else "-"]
-                + [f"{kobs[i]:.3g}" if not np.isnan(kobs[i]) else f"{k['M⁻ⁿ⁺¹·s⁻¹'][i]:.3g}"]
+                + [f"{kapp[i]:.3g}" if not np.isnan(kapp[i]) else f"{k['M⁻ⁿ⁺¹·s⁻¹'][i]:.3g}"]
             )
             if self.model.scheme.is_half_equilibrium[i]:
                 row[2] = "Yes"
                 row[-1] = None  # hide transmission coefficient
                 row[-2] = None  # hide diffusion rate
-                row[-3] = None  # hide kobs correction
+                row[-3] = None  # hide kapp correction
 
             kinetics_table.add_row(*row)
         yield kinetics_table

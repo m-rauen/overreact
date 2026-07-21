@@ -15,7 +15,7 @@ __all__ = [
     "get_k",
     "get_kappa",
     "get_kdiff",
-    "get_kobs"
+    "get_kapp"
 ]
 
 
@@ -827,10 +827,10 @@ def get_kdiff(
     return kdiff, diffusion_method
 
 
-def get_kobs(
+def get_kapp(
     k_tst: float | np.ndarray,
     k_diffusion: float | np.ndarray,
-):
+) -> float:
     return rates.ck_correction(
         k_diffusion,
         k_tst
