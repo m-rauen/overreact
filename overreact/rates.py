@@ -143,7 +143,7 @@ def collins_kimball(
     return final_kdiff, diffusion_method
 
 
-def ck_correction(
+def diffusion_correction(
     k_tst: float | np.ndarray,
     k_diff: float | np.ndarray
 ):
