@@ -43,7 +43,7 @@ def liquid_viscosity(id, temperature=298.15, pressure=constants.atm):
     """
     return rx._misc._get_chemical(id, temperature, pressure).mul
 
-
+# TODO(m-rauen): redo the docstring of this function
 def collins_kimball(
     radii: float | np.ndarray = None,
     viscosity: str =  None,
@@ -142,12 +142,12 @@ def collins_kimball(
         
     return final_kdiff, diffusion_method
 
-
+# TODO(m-rauen): docstring this function
 def diffusion_correction(
     k_tst: float | np.ndarray,
     k_diff: float | np.ndarray
 ):
-    """Calculate reaction rate constant inclusing diffusion effects.
+    """Calculate reaction rate constant including diffusion effects.
 
     This implementation is based on doi:10.1016/0095-8522(49)90023-9.
 
@@ -158,14 +158,18 @@ def diffusion_correction(
 
     Returns
     -------
-    float
+    float or array-like
+    
+    Notes
+    -----
+    Although the diffusion correction in doi:10.1016/0095-8522(49)90023-9 is mathematically expressed as :math:`{k_tst * k_diff}{k_tst + k_diff}`, for floating point operations the best practice is to use the reciprocal version, since :math:`\frac{ab}{a+b} = \frac{1}{\frac{a+b}{ab}} = \frac{1}{\frac{1}{a}+\frac{1}{b}}`. Therefore, we apply it.
 
     Examples
     --------
-    >>> ck_corrected(2.3e7, 3.6e9)
+    >>> diffusion_correction(2.3e7, 3.6e9)
     2.3e7
     """
-    return k_tst * k_diff / (k_tst + k_diff)
+    return 1.0 / (1.0 / k_tst + 1.0 / k_diff)
 
 
 def convert_rate_constant(

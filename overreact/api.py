@@ -769,7 +769,7 @@ def get_kappa(
     )
     return vec_kappas
 
-# TODO(m-rauen): docstring for this function!!
+# TODO(m-rauen): docstring for this function
 def get_kdiff(
     scheme: Scheme | dict,
     compounds: dict | None = None,
@@ -785,9 +785,9 @@ def get_kdiff(
         if environment is None:
             environment = rx.core._get_environment(name)
         
-    number_reactions = len(scheme.reactions)
-    kdiff = np.full(number_reactions, np.inf)
-       
+    kdiff = np.full(len(scheme.reactions), np.inf)
+    
+    # TODO(m-rauen): use 'get_molecularity()' from thermo/__init__
     for idx, reaction in enumerate(scheme.reactions): 
         # NOTE(m-rauen): I'm not 100% sure if I should maintain the splitting like [0:-1]. Of course last step (-1) doesn't count because of products assumption, however, the diffusion to encounter-distance of intermediates is being considered now (0:), instead of *only* the original reactants (0).
         reactants = re.split(r"\s*->\s*|\s*<=>\s*", reaction)[:-1]
@@ -827,6 +827,7 @@ def get_kdiff(
     return kdiff, diffusion_method
 
 
+# TODO(m-rauen): docstring this function
 def get_kapp(
     k_tst: float | np.ndarray,
     k_diffusion: float | np.ndarray,
@@ -835,7 +836,7 @@ def get_kapp(
         k_tst,
         k_diffusion
     ) 
-    
+
 
 def get_drc(
     scheme,

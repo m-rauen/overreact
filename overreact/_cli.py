@@ -606,7 +606,7 @@ class Report:
                 + [f"{k[scale][i]:.3g}" for scale in k]
                 + [f"{kappa[i]:.3g}"]
                 + [f"{kdiff[i]:.3g}" if np.isfinite(kdiff[i]) else "-"]
-                + [f"{kapp[i]:.3g}" if not np.isnan(kapp[i]) else f"{k['M⁻ⁿ⁺¹·s⁻¹'][i]:.3g}"]
+                + [f"{kapp[i]:.3g}"]
             )
             if self.model.scheme.is_half_equilibrium[i]:
                 row[2] = "Yes"
