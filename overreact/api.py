@@ -21,7 +21,6 @@ __all__ = [
 
 import logging
 import warnings
-import re
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -786,36 +785,34 @@ def get_kdiff(
             environment = rx.core._get_environment(name)
         
     kdiff = np.full(len(scheme.reactions), np.inf)
+    molecularity = rx.thermo.get_molecularity(scheme.B)
     
-    # TODO(m-rauen): use 'get_molecularity()' from thermo/__init__
-    for idx, reaction in enumerate(scheme.reactions): 
-        # NOTE(m-rauen): I'm not 100% sure if I should maintain the splitting like [0:-1]. Of course last step (-1) doesn't count because of products assumption, however, the diffusion to encounter-distance of intermediates is being considered now (0:), instead of *only* the original reactants (0).
-        reactants = re.split(r"\s*->\s*|\s*<=>\s*", reaction)[:-1]
-        for spc in reactants:
-            species = [s.strip() for s in spc.split('+')]
+    for idx, (reaction, order) in enumerate(zip(scheme.B, molecularity)):
+        if order != 2:
+            if order == 1:
+                logger.warning(
+                    f"reaction {idx} [{reaction}] is unimolecular:"
+                    "skipping diffusional rate constant calculation",
+                )
+            else: 
+                logger.warning(
+                    f"reaction {idx} [{reaction}] is trimolecular (or more):"
+                    "skipping diffusional rate constant calculation"
+                )
         
-        if len(species) != 2:
-            if len(species) == 1:
-                logger.warning(
-                    f"reaction {idx} ({reaction}) is unimolecular: "
-                    "skipping diffusional rate constant calculation",
-                )
-            else:
-                logger.warning(
-                    f"reaction {idx} ({reaction}) has 3 (or more) reactants: " 
-                    "skipping diffusional rate constant calculation",
-                )
-            continue
+        # NOTE(m-rauen): I'm not 100% sure if I should maintain the splitting like [0:-1]. Of course last step (-1) doesn't count because of products assumption, however, the diffusion to encounter-distance of intermediates is being considered now (0:), instead of *only* the original reactants (0).
+        reactants = np.flatnonzero(scheme.B[:, idx] < 0) 
+        species = [scheme.compounds[i] for i in species]
         
         radii = np.array(
             [
                 coords.get_molecular_radius(
-                    atomnos=compounds[spc].atomnos,
-                    atomcoords=compounds[spc].atomcoords
+                    atomnos=reactants[spc].atomnos,
+                    atomcoords=reactants[spc].atomcoords
                 )
-                for spc in species
+                for spc in species 
             ],
-        ) 
+        )
         
         kdiff[idx], diffusion_method = rates.collins_kimball(
             radii=radii,

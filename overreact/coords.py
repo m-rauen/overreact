@@ -181,7 +181,7 @@ def get_molecular_radius(
    atomnos: tuple[int, ...], 
    atomcoords: tuple[(int, ...), ...],
    full_output: bool = False,
-   method: str = 'vdw',
+   method: str = 'garza',
 ):
     def _molecular_volume_to_radius(volume):
         return ((3 * volume) / (4 * np.pi)) ** (1/3)
