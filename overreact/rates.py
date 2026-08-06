@@ -130,8 +130,9 @@ def collins_kimball(
        
     surface_reactivity = (reactivity * reactive_radius) / 3
     return (
-    4.0 * np.pi * reactive_radius * mutual_diff_coef
-    * (surface_reactivity / (surface_reactivity + (mutual_diff_coef / reactive_radius)))
+    4.0 * np.pi * reactive_radius * mutual_diff_coef * (surface_reactivity / (surface_reactivity + (mutual_diff_coef / reactive_radius)))
+    * constants.N_A
+    / constants.liter
     )
 
 
