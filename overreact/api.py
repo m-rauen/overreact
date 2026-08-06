@@ -788,7 +788,7 @@ def get_kdiff(
     kdiff = np.full(len(scheme.reactions), np.inf)
     molecularity = rx.thermo.get_molecularity(scheme.A)
     
-    for idx, (reaction, order) in enumerate(zip(A, molecularity)):
+    for idx, (_, order) in enumerate(zip(A, molecularity)):
         if order != 2:
             if order == 1:
                 logger.warning(
@@ -802,11 +802,6 @@ def get_kdiff(
                 )
             continue
         
-        # NOTE(m-rauen): I'm not 100% sure if I should maintain the splitting
-        # like [0:-1]. Of course last step (-1) doesn't count because of
-        # products assumption, however, the diffusion to encounter-distance of
-        # intermediates is being considered now (0:), instead of *only* the
-        # original reactants (0).
         reactants = np.flatnonzero(A[:-1, idx] < 0) 
         species = [scheme.compounds[i] for i in reactants]
         
@@ -820,14 +815,14 @@ def get_kdiff(
             ],
         )
         
-        kdiff[idx], diffusion_method = rates.collins_kimball(
+        kdiff[idx] = rates.collins_kimball(
             radii=radii,
             viscosity=environment,
             temperature=temperature,
             pressure=pressure,
         )
     
-    return kdiff, diffusion_method
+    return kdiff
 
 
 # TODO(m-rauen): docstring this function

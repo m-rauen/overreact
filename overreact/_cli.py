@@ -574,7 +574,7 @@ class Report:
             qrrho=self.qrrho,
             temperature=self.temperature,
         )
-        kdiff, diff_method = rx.get_kdiff(
+        kdiff = rx.get_kdiff(
             self.model.scheme,
             self.model.compounds,
             temperature=self.temperature,
@@ -628,7 +628,8 @@ class Report:
             pass
         else:
             yield Markdown(
-                "Diffusional rate constant(s) calculated through the " f"{diff_method} formalism."
+                "Diffusional rate constant(s) calculated through the "
+                "Collins-Kimball formulation" 
             )
 
         if self.concentrations is not None and self.concentrations:

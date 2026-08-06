@@ -52,7 +52,6 @@ def collins_kimball(
     temperature: float | np.ndarray = 298.15,
     pressure: float = constants.atm,
     mutual_diff_coef: float | np.ndarray = None,
-    diffusion_method: str = 'Einstein-Smoluchowski',
 ):
     r"""Calculate irreversible diffusion-controlled reaction rate constant.
 
@@ -123,24 +122,18 @@ def collins_kimball(
         # it works. My guess is that there is some confusion between contact
         # distances (which are basically sums of two radii) and sums of pairs
         # of radii.
-        # NOTE(m-rauen): it seems to me that the reactive radius is much more connected with the sum of the collision diameters of the involved molecules
+        # NOTE(m-rauen): it seems to me that the reactive radius is much more connected with the contact distance experimentally. 
         reactive_radius = np.sum(radii, axis=0)
         
-    # TODO(m-rauen): there's too much repetition and low readibility occuring here, I need to refactor this final piece of code.
-    # TODO(m-rauen): also, I don't like the currect variables names that we're seeing (kdiff, final_kdiff, etc).
     if reactivity is None:
-        final_kdiff = (
-            4.0 * np.pi * reactive_radius * mutual_diff_coef
-        ) * constants.N_A / constants.liter
-    else:
-        diffusion_method = 'Collins-Kimball'
-        surface_reactivity = (reactivity * reactive_radius) / 3
-        final_kdiff = (
-            4.0 * np.pi * reactive_radius * mutual_diff_coef 
-            * (surface_reactivity / (surface_reactivity + (mutual_diff_coef / reactive_radius)))
-        ) * constants.N_A / constants.liter
-        
-    return final_kdiff, diffusion_method
+            reactivity = constants.k * temperature / constants.h
+       
+    surface_reactivity = (reactivity * reactive_radius) / 3
+    return (
+    4.0 * np.pi * reactive_radius * mutual_diff_coef
+    * (surface_reactivity / (surface_reactivity + (mutual_diff_coef / reactive_radius)))
+    )
+
 
 # TODO(m-rauen): docstring this function
 def diffusion_correction(
