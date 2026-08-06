@@ -783,32 +783,38 @@ def get_kdiff(
     for name in compounds:
         if environment is None:
             environment = rx.core._get_environment(name)
-        
+       
+    A = np.asarray(scheme.A) 
     kdiff = np.full(len(scheme.reactions), np.inf)
-    molecularity = rx.thermo.get_molecularity(scheme.B)
+    molecularity = rx.thermo.get_molecularity(scheme.A)
     
-    for idx, (reaction, order) in enumerate(zip(scheme.B, molecularity)):
+    for idx, (reaction, order) in enumerate(zip(A, molecularity)):
         if order != 2:
             if order == 1:
                 logger.warning(
-                    f"reaction {idx} [{reaction}] is unimolecular:"
+                    f"reaction {idx} [{scheme.reactions[idx]}] is unimolecular: "
                     "skipping diffusional rate constant calculation",
                 )
             else: 
                 logger.warning(
-                    f"reaction {idx} [{reaction}] is trimolecular (or more):"
+                    f"reaction {idx} [{scheme.reactions[idx]}] is trimolecular (or more): "
                     "skipping diffusional rate constant calculation"
                 )
+            continue
         
-        # NOTE(m-rauen): I'm not 100% sure if I should maintain the splitting like [0:-1]. Of course last step (-1) doesn't count because of products assumption, however, the diffusion to encounter-distance of intermediates is being considered now (0:), instead of *only* the original reactants (0).
-        reactants = np.flatnonzero(scheme.B[:, idx] < 0) 
-        species = [scheme.compounds[i] for i in species]
+        # NOTE(m-rauen): I'm not 100% sure if I should maintain the splitting
+        # like [0:-1]. Of course last step (-1) doesn't count because of
+        # products assumption, however, the diffusion to encounter-distance of
+        # intermediates is being considered now (0:), instead of *only* the
+        # original reactants (0).
+        reactants = np.flatnonzero(A[:-1, idx] < 0) 
+        species = [scheme.compounds[i] for i in reactants]
         
         radii = np.array(
             [
                 coords.get_molecular_radius(
-                    atomnos=reactants[spc].atomnos,
-                    atomcoords=reactants[spc].atomcoords
+                    atomnos=compounds[spc].atomnos,
+                    atomcoords=compounds[spc].atomcoords
                 )
                 for spc in species 
             ],
