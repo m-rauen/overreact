@@ -4387,3 +4387,75 @@ def test_can_rotate_to_principal_axes() -> None:
         ),
     )
     assert new_atomcoords == pytest.approx(atomcoords)
+
+def test_can_get_molecular_radii() -> None:
+    """Validate Edwards molecular radii from Table 6 of doi:10.1021/ed047p261"""
+    # CH4
+    data = datasets.logfiles["radii"]["ch4"]
+    assert coords.get_molecular_radius(
+        data.atomnos,
+        data.atomcoords,
+    ) == pytest.approx(1.89, 4e-4)
+    
+    # CF4
+    data = datasets.logfiles["radii"]["cf4"]
+    assert coords.get_molecular_radius(
+        data.atomnos,
+        data.atomcoords
+    ) == pytest.approx(2.21, 4e-4)
+    
+    # CCl4
+    data = datasets.logfiles["radii"]["ccl4"]
+    assert coords.get_molecular_radius(
+        data.atomnos,
+        data.atomcoords
+    ) == pytest.approx(2.73, 4e-4)
+    
+    # CBr4
+    data = datasets.logfiles["radii"]["ccl4"]
+    assert coords.get_molecular_radius(
+        data.atomnos,
+        data.atomcoords
+    ) == pytest.approx(2.91, 4e-4)
+    
+    # C10H8 (naphthalene)
+    data = datasets.logfiles["radii"]["naph"]
+    assert coords.get_molecular_radius(
+        data.atomnos,
+        data.atomcoords
+    ) == pytest.approx(3.08, 4e-4)
+    
+    # C12H10 (biphenyl)
+    data = datasets.logfiles["radii"]["biph"]
+    assert coords.get_molecular_radius(
+        data.atomnos, 
+        data.atomcoords
+    ) == pytest.approx(3.30, 4e-4)
+    
+    # C14H10 (anthracene)
+    data = datasets.logfiles["radii"]["ant"]
+    assert coords.get_molecular_radius(
+        data.atomnos,
+        data.atomcoords
+    ) == pytest.approx(3.41, 4e-4)
+    
+    # C8H18 (n-octane)
+    data = datasets.logfiles["radii"]["oct"]
+    assert coords.get_molecular_radius(
+        data.atomnos,
+        data.atomcoords
+    ) == pytest.approx(3.28, 4e-3)
+    
+    # C10H22 (n-decane)
+    data = datasets.logfiles["radii"]["dec"]
+    assert coords.get_molecular_radius(
+        data.atomnos,
+        data.atomcoords
+    ) == pytest.approx(3.51, 4e-3)
+    
+    # C12H26 (n-dodecane)
+    data = datasets.logfiles["radii"]["dodec"]
+    assert coords.get_molecular_radius(
+        data.atomnos,
+        data.atomcoords
+    ) == pytest.approx(3.72, 4e-3)

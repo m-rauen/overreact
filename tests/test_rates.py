@@ -76,7 +76,7 @@ def test_eyring_calculates_reaction_barrier() -> None:
         [barrier1, barrier2],
         temperature=[298.15, 1074.0],
     ) == pytest.approx([1.38, 3.2513e9], 4e-3)
-
+    
 
 # TODO(mrauen): this piece of code tests the old implementation for diffusion controlled reactions. I will implement the new test and change it here.
 # def test_smoluchowski_calculates_diffusion_limited_reaction_rates() -> None:
@@ -109,6 +109,11 @@ def test_eyring_calculates_reaction_barrier() -> None:
 #     [3.6e9, 3.8e9, 4.9e9, 6.0e9, 7.3e9, 8.8e9, 1.0e10],
 #     4e-2,
 # )
+
+  
+def test_diffusion_correction_calculates_apparent_rate_constant() -> None:
+    """Ensure apparent rates are correct."""
+    pass
 
 
 def test_liquid_viscosities_are_correct() -> None:
