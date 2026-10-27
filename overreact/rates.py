@@ -46,7 +46,7 @@ def liquid_viscosity(id, temperature=298.15, pressure=constants.atm):
 # TODO(m-rauen): redo the docstring of this function
 def collins_kimball(
     radii: float | np.ndarray = None,
-    viscosity: str =  None,
+    viscosity: float | str =  None,
     reactive_radius: float | np.ndarray = None,
     reactivity: float | np.ndarray = None,
     temperature: float | np.ndarray = 298.15,
@@ -55,23 +55,21 @@ def collins_kimball(
 ):
     r"""Calculate irreversible diffusion-controlled reaction rate constant.
 
-    PRETTY MUCH EVERYTHING HERE IS OPTIONAL!
-
     Parameters
     ----------
     radii : array-like, optional
     viscosity : float, str or callable, optional
-    reactive_radius : float, optional
-    surface_reactiviy: float, optional
-    temperature : array-like, optional
+    reactive_radius : float, array-like, optional
+    surface_reactiviy: float, array-like, optional
+    temperature : array-like
         Absolute temperature in Kelvin.
-    pressure : array-like, optional
+    pressure : array-like
         Reference gas pressure.
-    mutual_diff_coef : array-like, optional
+    mutual_diff_coef : float, array-like, optional
 
     Returns
     -------
-    float
+    float or array-like
 
     Notes
     -----
@@ -126,11 +124,10 @@ def collins_kimball(
         reactive_radius = np.sum(radii, axis=0)
         
     if reactivity is None:
-            reactivity = constants.k * temperature / constants.h
+            reactivity = reactive_radius * (constants.k * temperature / constants.h)
        
-    surface_reactivity = (reactivity * reactive_radius) / 3
     return (
-    4.0 * np.pi * reactive_radius * mutual_diff_coef * (surface_reactivity / (surface_reactivity + (mutual_diff_coef / reactive_radius)))
+    4.0 * np.pi * reactive_radius * mutual_diff_coef * (reactivity / (reactivity + (mutual_diff_coef / reactive_radius)))
     * constants.N_A
     / constants.liter
     )

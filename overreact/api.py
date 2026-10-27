@@ -803,7 +803,7 @@ def get_kdiff(
             continue
         
         reactants = np.flatnonzero(A[:-1, idx] < 0) 
-        species = [scheme.compounds[i] for i in reactants]
+        species = [scheme.compounds[reacts] for reacts in reactants]
         
         radii = np.array(
             [

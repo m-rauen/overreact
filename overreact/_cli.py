@@ -635,7 +635,7 @@ class Report:
         if self.concentrations is not None and self.concentrations:
             scheme, k, y0 = _prepare_simulation(
                 self.model.scheme,
-                k["M⁻ⁿ⁺¹·s⁻¹"],
+                kapp,
                 self.concentrations,
             )
 
