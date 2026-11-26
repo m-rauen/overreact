@@ -177,7 +177,6 @@ def get_molecular_volume(
     return vdw_volume
 
 # TODO(m-rauen): docstring this function
-
 def get_molecular_radius(
    atomnos: tuple[int] | np.ndarray, 
    atomcoords: tuple[(float)] | np.ndarray,

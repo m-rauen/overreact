@@ -773,6 +773,7 @@ def get_kdiff(
     scheme: Scheme | dict,
     compounds: dict | None = None,
     environment: str | None = None,
+    reactivity: float = None,
     temperature: float = 298.15,
     pressure: float = constants.atm,
 ) -> float:
@@ -821,6 +822,7 @@ def get_kdiff(
         kdiff[idx] = rates.collins_kimball(
             radii=radii,
             viscosity=environment,
+            reactivity=reactivity,
             temperature=temperature,
             pressure=pressure,
         )

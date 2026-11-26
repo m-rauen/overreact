@@ -125,7 +125,7 @@ def collins_kimball(
         # of radii.
         # NOTE(m-rauen): it seems to me that the reactive radius is much more connected with the contact distance experimentally. 
         reactive_radius = np.sum(radii, axis=0)
-        
+    
     if reactivity is None:
             reactivity = reactive_radius * (constants.k * temperature / constants.h)
        
@@ -136,7 +136,6 @@ def collins_kimball(
     )
 
 
-# TODO(m-rauen): docstring this function
 def diffusion_correction(
     k_tst: float | np.ndarray,
     k_diff: float | np.ndarray

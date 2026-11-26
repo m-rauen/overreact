@@ -145,6 +145,7 @@ class Report:
         max_time=1 * 60 * 60,
         rtol=1e-3,
         atol=1e-6,
+        reactivity=None,
         box_style=box.SIMPLE,
     ) -> None:
         """Initialize a Report object."""
@@ -169,6 +170,7 @@ class Report:
         self.max_time = max_time
         self.rtol = rtol
         self.atol = atol
+        self.reactivity = reactivity
         self.box_style = box_style
 
     def __rich_console__(self, console, options):
@@ -577,6 +579,7 @@ class Report:
         kdiff = rx.get_kdiff(
             self.model.scheme,
             self.model.compounds,
+            reactivity=self.reactivity,
             temperature=self.temperature,
             pressure=self.pressure
         )
@@ -897,7 +900,18 @@ def main(arguments=None):
         type=float,
         default=1e-6,
     )
+    parser.add_argument(
+        "--reactivity",
+        "--react",
+        help="set Collins-Kimball reactivity parameter (in meters per second) to calculate diffusion rate constant.",
+        type=float,
+        default=None
+    )
     args = parser.parse_args(arguments)
+   
+    if args.reactivity is not None:
+        if args.reactivity <= 0: 
+            parser.error("--reactivity must be a positive number.")
 
     try:
         args.bias = float(args.bias) * constants.kcal
@@ -948,6 +962,7 @@ Inputs:
 - Abs. Tol.      = {args.atol}
 - Bias           = {bias_message}
 - Tunneling      = {args.tunneling}
+- Reactivity     = {args.reactivity}
 
 Parsing and calculating (this may take a while)…
             """,
@@ -977,6 +992,7 @@ Parsing and calculating (this may take a while)…
         max_time=args.max_time,
         rtol=args.rtol,
         atol=args.atol,
+        reactivity=args.reactivity,
     )
     console.print(report, justify="left")
 
