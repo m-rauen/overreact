@@ -106,6 +106,9 @@ def collins_kimball(
     temperature = np.asarray(temperature)
         
     if mutual_diff_coef is None:
+        # TODO (m-rauen): right now viscosity can be passed as an array of
+        # floats, but it cannot be passed as an array of strings. It should be
+        # nice changing that, thus allowing users to use what best suit them.
         if callable(viscosity):
             viscosity = viscosity(temperature)
         elif isinstance(viscosity, str):

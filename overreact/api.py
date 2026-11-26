@@ -809,7 +809,10 @@ def get_kdiff(
             [
                 coords.get_molecular_radius(
                     atomnos=compounds[spc].atomnos,
-                    atomcoords=compounds[spc].atomcoords
+                    atomcoords=compounds[spc].atomcoords,
+                    environment=environment,
+                    temperature=temperature,
+                    pressure=pressure
                 )
                 for spc in species 
             ],

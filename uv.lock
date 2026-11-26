@@ -1817,7 +1817,7 @@ requires-dist = [
     { name = "importlib", specifier = ">=1.0.4,<2" },
     { name = "jax", marker = "extra == 'fast'", specifier = ">=0.4" },
     { name = "jaxlib", marker = "extra == 'fast'", specifier = ">=0.4" },
-    { name = "rich", marker = "extra == 'cli'", specifier = ">=13,<15" },
+    { name = "rich", marker = "extra == 'cli'", specifier = ">=13,<16" },
     { name = "scipy", specifier = ">=1.10,<2" },
     { name = "thermo", marker = "extra == 'solvents'", specifier = ">=0.2" },
 ]
@@ -1827,23 +1827,19 @@ provides-extras = ["cli", "fast", "solvents"]
 dev = [
     { name = "debugpy", specifier = ">=1,<2" },
     { name = "flynt", specifier = ">=0.77,<1.1" },
-    { name = "ipython", specifier = ">=8,<9" },
+    { name = "ipython", specifier = ">=8,<10" },
     { name = "jupyter", specifier = ">=1.0.0,<2" },
     { name = "matplotlib", specifier = ">=3,<4" },
     { name = "mypy", specifier = ">=0.991,<2.4" },
-    { name = "pdoc", specifier = ">=12,<15" },
+    { name = "pdoc", specifier = ">=12,<17" },
     { name = "perflint", specifier = ">=0.7.1,<0.9.0" },
     { name = "pytest", specifier = ">=7.2,<10.0" },
-    { name = "pytest-cov", specifier = ">=4,<6" },
-    { name = "rich", specifier = ">=13,<15" },
-<<<<<<< HEAD
-    { name = "ruff", specifier = ">=0.0.210,<0.16.3" },
-=======
-    { name = "ruff", specifier = ">=0.0.210,<0.15.21" },
->>>>>>> 2820986 (feat: adding reactants separation based on reaction scheme)
+    { name = "pytest-cov", specifier = ">=4,<8" },
+    { name = "rich", specifier = ">=13,<16" },
+    { name = "ruff", specifier = ">=0.0.210,<0.16.5" },
     { name = "seaborn", specifier = ">=0.12,<0.14" },
     { name = "thermo", specifier = ">=0.2" },
-    { name = "types-setuptools", specifier = ">=65,<84" },
+    { name = "types-setuptools", specifier = ">=65,<85" },
 ]
 
 [[package]]

@@ -177,19 +177,23 @@ def get_molecular_volume(
     return vdw_volume
 
 # TODO(m-rauen): docstring this function
+
 def get_molecular_radius(
-   atomnos: tuple[int, ...], 
-   atomcoords: tuple[(int, ...), ...],
+   atomnos: tuple[int] | np.ndarray, 
+   atomcoords: tuple[(float)] | np.ndarray,
    full_output: bool = False,
+   environment: str = 'water',
    method: str = 'garza',
+   temperature: float = 298.15,
+   pressure: float = constants.atm
 ):
     def _molecular_volume_to_radius(volume):
         return ((3 * volume) / (4 * np.pi)) ** (1/3)
     
     if not full_output:
         vdw_volumes = get_molecular_volume(
-            atomnos,
-            atomcoords
+            atomnos=atomnos,
+            atomcoords=atomcoords
         )
         return _molecular_volume_to_radius(vdw_volumes)
     
@@ -198,7 +202,10 @@ def get_molecular_radius(
             vdw_volumes, cav_volumes, garza_error = get_molecular_volume(
                 atomnos,
                 atomcoords,
-                full_output=True
+                full_output=True,
+                environment=environment,
+                temperature=temperature,
+                pressure=pressure
             )
             radii = _molecular_volume_to_radius(vdw_volumes)
             cav_radii = _molecular_volume_to_radius(cav_volumes)

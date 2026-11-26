@@ -78,42 +78,93 @@ def test_eyring_calculates_reaction_barrier() -> None:
     ) == pytest.approx([1.38, 3.2513e9], 4e-3)
     
 
-# TODO(mrauen): this piece of code tests the old implementation for diffusion controlled reactions. I will implement the new test and change it here.
-# def test_smoluchowski_calculates_diffusion_limited_reaction_rates() -> None:
-# """Ensure Smoluchowski rates are correct."""
-# radii = np.array([2.59, 2.71]) * constants.angstrom
-# assert rx.rates.collins_kimball(
-#     radii,
-#     reactive_radius=2.6 * constants.angstrom,
-#     viscosity=[
-#         8.90e-4,
-#         8.54e-4,
-#         6.94e-4,
-#         5.77e-4,
-#         4.90e-4,
-#         4.22e-4,
-#         3.69e-4,
-#     ],
-#     temperature=[298.15, 300.00, 310.00, 320.00, 330.00, 340.00, 350.00],
-# ) / constants.liter == pytest.approx(
-#     [3.6e9, 3.8e9, 4.9e9, 6.0e9, 7.3e9, 8.8e9, 1.0e10],
-#     4e-2,
-# )
-
-# assert rx.rates.collins_kimball(
-#     radii,
-#     reactive_radius=2.6 * constants.angstrom,
-#     viscosity="water",
-#     temperature=[298.15, 300.00, 310.00, 320.00, 330.00, 340.00, 350.00],
-# ) / constants.liter == pytest.approx(
-#     [3.6e9, 3.8e9, 4.9e9, 6.0e9, 7.3e9, 8.8e9, 1.0e10],
-#     4e-2,
-# )
+def test_collins_kimball_calculates_diffusion_limited_reaction_rates() -> None:
+    """Ensure Collins-Kimball rates are correct."""
+    assert np.log10(rx.rates.collins_kimball(
+        radii=np.array([3.62, 3.06]) * constants.angstrom,
+        viscosity='acetonitrile',
+    )) == pytest.approx(np.log10(2.65e10), rel=.15)
+    
+    assert np.log10(rx.rates.collins_kimball(
+        radii=np.array([3.72, 3.06]) * constants.angstrom,
+        viscosity='acetonitrile'
+    )) == pytest.approx(np.log10(2.47e10), rel=.15)
+    
+    assert np.log10(rx.rates.collins_kimball(
+        radii=np.array([3.82, 3.06]) * constants.angstrom,
+        viscosity='acetonitrile'
+    )) == pytest.approx(np.log10(2.74e10), rel=.15)
+    
+    assert np.log10(rx.rates.collins_kimball(
+        radii=np.array([3.62, 3.18]) * constants.angstrom,
+        viscosity='acetonitrile'
+    )) == pytest.approx(np.log10(2.47e10), rel=.15)
+    
+    assert np.log10(rx.rates.collins_kimball(
+        radii=np.array([3.72, 3.18]) * constants.angstrom,
+        viscosity='acetonitrile'
+    )) == pytest.approx(np.log10(2.47e10), rel=.15)
+    
+    assert np.log10(rx.rates.collins_kimball(
+        radii=np.array([3.82, 3.18]) * constants.angstrom,
+        viscosity='acetonitrile'
+    )) == pytest.approx(np.log10(1.98e10), rel=.15)
+    
+    assert np.log10(rx.rates.collins_kimball(
+        radii=np.array([3.69, 2.77]) * constants.angstrom,
+        viscosity='methanol'
+    )) == pytest.approx(np.log10(0.80e10), rel=.15)
+    
+    assert np.log10(rx.rates.collins_kimball(
+        radii=np.array([3.69, 3.06]) * constants.angstrom,
+        viscosity='methanol'
+    )) == pytest.approx(np.log10(1.39e10), rel=.15)
+    
+    assert np.log10(rx.rates.collins_kimball(
+        radii=np.array([3.39, 3.06]) * constants.angstrom,
+        viscosity='acetonitrile'
+    )) == pytest.approx(np.log10(0.98e10), rel=.15)
+    
+    assert np.log10(rx.rates.collins_kimball(
+        radii=np.array([3.72, 3.00]) * constants.angstrom,
+        viscosity='acetonitrile'
+    )) == pytest.approx(np.log10(2.90e10), rel=.15)
+    
+    # many radii pairs at once
+    assert np.log10(rx.rates.collins_kimball(
+        radii=[
+            np.array([3.69, 2.77]) * constants.angstrom,
+            np.array([3.69, 3.06]) * constants.angstrom
+        ],
+        viscosity='acetonitrile'
+    )) == pytest.approx(np.log10([0.80e10, 1.39e10]), rel=.15)
+    
+    # many viscosities at once
+    assert np.log10(rx.rates.collins_kimball(
+        radii=np.array([3.72, 3.00]) * constants.angstrom,
+        viscosity=np.array([3.43e-4, 8.02e-4])
+    )) == pytest.approx(np.log10([2.90e10, 1.20e10]), rel=.15)
 
   
 def test_diffusion_correction_calculates_apparent_rate_constant() -> None:
     """Ensure apparent rates are correct."""
-    pass
+    # methoxylation SN2 reaction from Overreact docs
+    assert rx.rates.diffusion_correction(
+        k_tst=159,
+        k_diff=1.27e10
+    ) == pytest.approx(159, rel=4e-5) 
+    
+    # exciplex formation of [DCNA+DMA]*
+    assert rx.rates.diffusion_correction(
+        k_tst=5.03e16,
+        k_diff=1.95e10
+    ) == pytest.approx(1.95e10, rel=4e-5)
+    
+    # 2-bromopropane E2 reaction @ DMSO
+    assert rx.rates.diffusion_correction(
+        k_tst=2.98e9,
+        k_diff=3.55e9
+    ) == pytest.approx(1.62e9, rel=4e-5)
 
 
 def test_liquid_viscosities_are_correct() -> None:
