@@ -144,6 +144,13 @@ def test_collins_kimball_calculates_diffusion_limited_reaction_rates() -> None:
         radii=np.array([3.72, 3.00]) * constants.angstrom,
         viscosity=np.array([3.43e-4, 8.02e-4])
     )) == pytest.approx(np.log10([2.90e10, 1.20e10]), rel=.15)
+    
+    # many reactivities at once
+    assert rx.rates.collins_kimball(
+        radii=np.array([2.98, 1.97]) * constants.angstrom,
+        viscosity=5.94e-3,
+        reactivity=np.array([1.0, 2e-20])
+    ) == pytest.approx(np.array([1.27e10, 2.88e9]))
 
   
 def test_diffusion_correction_calculates_apparent_rate_constant() -> None:
